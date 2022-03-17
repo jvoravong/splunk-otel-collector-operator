@@ -16,19 +16,17 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/signalfx/splunk-otel-collector-operator/internal/autodetect"
-)
-
-const (
-	defaultJavaAgentImage = "quay.io/signalfx/splunk-otel-instrumentation-java:v1.7.1"
 )
 
 // log is for logging in this package.
@@ -217,6 +215,15 @@ func (r *Agent) defaultAgent() {
 		}
 	}
 
+	if spec.Resources.Limits == nil {
+		spec.Resources = v1.ResourceRequirements{
+			Limits: v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse(defaultAgentCPU),
+				v1.ResourceMemory: resource.MustParse(defaultAgentMemory),
+			},
+		}
+	}
+
 	if spec.Env == nil {
 		spec.Env = []v1.EnvVar{
 			{
@@ -236,13 +243,13 @@ func (r *Agent) defaultAgent() {
 			newEnvVar("HOST_VAR", "/hostfs/var"),
 			newEnvVar("HOST_RUN", "/hostfs/run"),
 			newEnvVar("HOST_DEV", "/hostfs/dev"),
+			newEnvVar("SPLUNK_MEMORY_TOTAL_MIB", getMemSizeInMiB(spec.Resources.Limits[v1.ResourceMemory])),
 			newEnvVarWithFieldRef("MY_NODE_NAME", "spec.nodeName"),
 			newEnvVarWithFieldRef("MY_NODE_IP", "status.hostIP"),
 			newEnvVarWithFieldRef("MY_POD_IP", "status.podIP"),
 			newEnvVarWithFieldRef("MY_POD_NAME", "metadata.name"),
 			newEnvVarWithFieldRef("MY_POD_UID", "metadata.uid"),
 			newEnvVarWithFieldRef("MY_NAMESPACE", "metadata.namespace"),
-			// TODO(splunk) support ballast
 		}
 	}
 
@@ -258,6 +265,15 @@ func (r *Agent) defaultClusterReceiver() {
 	spec := &r.Spec.ClusterReceiver
 	spec.HostNetwork = false
 
+	if spec.Resources.Limits == nil {
+		spec.Resources = v1.ResourceRequirements{
+			Limits: v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse(defaultAgentCPU),
+				v1.ResourceMemory: resource.MustParse(defaultAgentMemory),
+			},
+		}
+	}
+
 	if spec.Env == nil {
 		spec.Env = []v1.EnvVar{
 			{
@@ -277,13 +293,13 @@ func (r *Agent) defaultClusterReceiver() {
 			newEnvVar("HOST_VAR", "/hostfs/var"),
 			newEnvVar("HOST_RUN", "/hostfs/run"),
 			newEnvVar("HOST_DEV", "/hostfs/dev"),
+			newEnvVar("SPLUNK_MEMORY_TOTAL_MIB", getMemSizeInMiB(spec.Resources.Limits[v1.ResourceMemory])),
 			newEnvVarWithFieldRef("MY_NODE_NAME", "spec.nodeName"),
 			newEnvVarWithFieldRef("MY_NODE_IP", "status.hostIP"),
 			newEnvVarWithFieldRef("MY_POD_IP", "status.podIP"),
 			newEnvVarWithFieldRef("MY_POD_NAME", "metadata.name"),
 			newEnvVarWithFieldRef("MY_POD_UID", "metadata.uid"),
 			newEnvVarWithFieldRef("MY_NAMESPACE", "metadata.namespace"),
-			// TODO(splunk) support ballast
 		}
 	}
 
@@ -301,4 +317,18 @@ func (r *Agent) defaultGateway() {
 	// TODO(splunk): forcibly disable gateway until we add support for it.
 	spec.Disabled = true
 	spec.HostNetwork = false
+
+	if spec.Resources.Limits == nil {
+		spec.Resources = v1.ResourceRequirements{
+			Limits: v1.ResourceList{
+				v1.ResourceCPU:    resource.MustParse(defaultGatewayCPU),
+				v1.ResourceMemory: resource.MustParse(defaultGatewayMemory),
+			},
+		}
+	}
+}
+
+func getMemSizeInMiB(q resource.Quantity) string {
+	//  Mi = 1024 * 1024 bytes
+	return strconv.FormatInt(q.Value()/(1024*1024), 10)
 }
