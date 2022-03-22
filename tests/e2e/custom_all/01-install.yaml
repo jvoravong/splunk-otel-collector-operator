@@ -181,13 +181,6 @@ spec:
         value: my-splunk-realm-custom
       - name: MY_CLUSTER_NAME
         value: test-cluster-custom
-    resources:
-      requests:
-        memory: "200Mi"
-        cpu: "200m"
-      limits:
-        memory: "200Mi"
-        cpu: "200m"
   clusterReceiver:
     config: |2
       extensions:
@@ -281,12 +274,5 @@ spec:
               - resourcedetection
             exporters:
               - signalfx
-    resources:
-      requests:
-        memory: "200Mi"
-        cpu: "200m"
-      limits:
-        memory: "200Mi"
-        cpu: "200m"
   gateway:
     disabled: true

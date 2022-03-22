@@ -7,16 +7,15 @@ metadata:
 data:
   collector.yaml: |2
     extensions:
-      http_forwarder:
-        ingress:
-          endpoint: 0.0.0.0:6060
       health_check:
         endpoint: '0.0.0.0:13133'
-      zpages:
-        endpoint: '0.0.0.0:55679'
       k8s_observer:
         auth_type: serviceAccount
         node: '${MY_NODE_NAME}'
+      memory_ballast:
+        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
+      zpages:
+        endpoint: '0.0.0.0:55679'
     receivers:
       jaeger:
         protocols:
@@ -97,7 +96,6 @@ data:
           node: '${MY_NODE_NAME}'
       batch: null
       memory_limiter:
-        ballast_size_mib: '${SPLUNK_BALLAST_SIZE_MIB}'
         check_interval: 2s
         limit_mib: '${SPLUNK_MEMORY_LIMIT_MIB}'
       resource:
@@ -132,6 +130,7 @@ data:
       extensions:
         - health_check
         - k8s_observer
+        - memory_ballast
         - zpages
       pipelines:
         traces:
@@ -180,11 +179,10 @@ metadata:
 data:
   collector.yaml: |2+
     extensions:
-      http_forwarder:
-        ingress:
-          endpoint: 0.0.0.0:6061
       health_check:
         endpoint: '0.0.0.0:13133'
+      memory_ballast:
+        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
@@ -210,7 +208,6 @@ data:
     processors:
       batch: null
       memory_limiter:
-        ballast_size_mib: '${SPLUNK_BALLAST_SIZE_MIB}'
         check_interval: 2s
         limit_mib: '${SPLUNK_MEMORY_LIMIT_MIB}'
       resource:
@@ -250,6 +247,7 @@ data:
     service:
       extensions:
         - health_check
+        - memory_ballast
       pipelines:
         metrics:
           receivers:
