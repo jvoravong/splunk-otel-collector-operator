@@ -2,7 +2,7 @@ apiVersion: kuttl.dev/v1beta1
 kind: TestSuite
 crdDir: ./tests/_build/crds/
 artifactsDir: ./tests/_build/artifacts/
-kindNodeCache: true
+kindNodeCache: false
 kindContainers:
   - local/splunk-otel-operator:e2e
 commands:
