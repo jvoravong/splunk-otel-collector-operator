@@ -3,8 +3,7 @@ name: "End-to-end tests"
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  pull_request
 
 jobs:
   e2e-tests:
