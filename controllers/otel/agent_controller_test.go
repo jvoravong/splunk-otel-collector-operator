@@ -42,12 +42,18 @@ func TestNewObjectsOnReconciliation(t *testing.T) {
 	// prepare
 	nsn := types.NamespacedName{Name: "my-instance", Namespace: "default"}
 	reconciler := NewReconciler(logger, k8sClient, testScheme, nil)
+	gatewayEnabled := true
+
 	created := &v1alpha1.Agent{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      nsn.Name,
 			Namespace: nsn.Namespace,
 		},
-		Spec: v1alpha1.AgentSpec{},
+		Spec: v1alpha1.AgentSpec{
+			Gateway: v1alpha1.CollectorSpec{
+				Enabled: &gatewayEnabled,
+			},
+		},
 	}
 	err := k8sClient.Create(context.Background(), created)
 	require.NoError(t, err)
