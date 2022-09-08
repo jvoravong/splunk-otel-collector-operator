@@ -33,7 +33,7 @@ KIND_CONFIG ?= kind-$(KUBE_VERSION).yaml
 
 all: build
 
-##@ General
+##@ General x
 
 # The help target prints out all targets with their descriptions organized
 # beneath their categories. The categories are represented by '##@' and the
