@@ -24,6 +24,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -67,9 +68,9 @@ func desiredService(ctx context.Context, params Params) *corev1.Service {
 	labels := collector.Labels(params.Instance)
 	labels["app.kubernetes.io/name"] = naming.Service(params.Instance)
 
-	// by coincidence, the selector is the same as the label, but note that the selector points to the deployment
-	// whereas 'labels' refers to the service
-	selector := labels
+	// TODO: Add a param to modify selector label values
+	// These default selector values might be too restrictive for some users.
+	selector := collector.Labels(params.Instance)
 
 	config, err := adapters.ConfigFromString(params.Instance.Spec.Agent.Config)
 	if err != nil {
@@ -263,6 +264,11 @@ func filterPort(logger logr.Logger, candidate corev1.ServicePort, portNumbers ma
 
 		candidate.Name = fallbackName
 		return &candidate
+	}
+
+	// The Splunk Otel Collector and Chart use the port name for the TargetPort value.
+	candidate.TargetPort = intstr.IntOrString{
+		StrVal: candidate.Name,
 	}
 
 	// this port is unique, return as is

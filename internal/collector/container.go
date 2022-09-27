@@ -49,6 +49,7 @@ func Container(logger logr.Logger, spec v1alpha1.CollectorSpec) corev1.Container
 		args = append(args, fmt.Sprintf("--%s=%s", k, v))
 	}
 
+	// We could filter out /conf volumeMounts if they were defined
 	volumeMounts := []corev1.VolumeMount{{
 		Name:      naming.ConfigMapVolume(),
 		MountPath: "/conf",
@@ -61,6 +62,19 @@ func Container(logger logr.Logger, spec v1alpha1.CollectorSpec) corev1.Container
 		envVars = []corev1.EnvVar{}
 	}
 
+	// The CollectorSpec uses service ports so we have to convert them to container ports here
+	// TODO: Fix this
+	var containerPorts []corev1.ContainerPort
+	if spec.Ports != nil {
+		for _, servicePort := range spec.Ports {
+			containerPorts = append(containerPorts, corev1.ContainerPort{
+				Name:          servicePort.Name,
+				ContainerPort: servicePort.Port,
+				Protocol:      servicePort.Protocol,
+			})
+		}
+	}
+
 	return corev1.Container{
 		Name:            naming.Container(),
 		Image:           image,
@@ -70,5 +84,6 @@ func Container(logger logr.Logger, spec v1alpha1.CollectorSpec) corev1.Container
 		Env:             envVars,
 		Resources:       spec.Resources,
 		SecurityContext: spec.SecurityContext,
+		Ports:           containerPorts,
 	}
 }

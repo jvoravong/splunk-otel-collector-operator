@@ -35,7 +35,13 @@ func TestDefaultSpecNoNils(t *testing.T) {
 }
 
 func TestDefaultAgentValues(t *testing.T) {
-	var a = Agent{}
+	var a = Agent{
+		Spec: AgentSpec{
+			Realm:       "test",
+			ClusterName: "test",
+		},
+	}
+
 	a.Default()
 	assert.True(t, *a.Spec.Agent.Enabled, "The agent should be enabled by default")
 	assert.True(t, *a.Spec.ClusterReceiver.Enabled, "The cluster receiver should be enabled by default")

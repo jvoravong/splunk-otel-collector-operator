@@ -156,7 +156,7 @@ type AgentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	ClusterReceiver CollectorSpec `json:"clusterReceiver,omitempty"`
 
-	// Gateway is a Splunk OpenTelemetry Collector deployment used to export data to Splunk APM.
+	// ClusterReceiver is a Splunk OpenTelemetry Collector deployment used to export data to Splunk APM.
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	Gateway CollectorSpec `json:"gateway,omitempty"`

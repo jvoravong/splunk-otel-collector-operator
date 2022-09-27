@@ -59,9 +59,30 @@ func (r *Agent) Default() {
 	}
 
 	r.defaultInstrumentation()
+
+	// The agent is enabled by default
+	if r.Spec.Agent.Enabled == nil {
+		r.Spec.Agent.Enabled = &[]bool{true}[0]
+	}
+	// The cluster receiver is enabled by default
+	if r.Spec.ClusterReceiver.Enabled == nil {
+		r.Spec.ClusterReceiver.Enabled = &[]bool{true}[0]
+	}
+	// The gateway is not enabled by default
+	if r.Spec.Gateway.Enabled == nil {
+		s := false
+		r.Spec.Gateway.Enabled = &s
+	}
+
 	r.defaultAgent()
 	r.defaultClusterReceiver()
 	r.defaultGateway()
+	// if r.Spec.Agent.Enabled {
+	// }
+	// if .Spec.ClusterReceiver.Enabled {
+	// }
+	// if .Spec.Gateway.Enabled {
+	// }
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
@@ -143,7 +164,7 @@ func (r *Agent) validateCRDGatewaySpec() error {
 	spec := r.Spec.Gateway
 
 	if spec.HostNetwork {
-		return fmt.Errorf("`hostNetwork` cannot be true for clusterReceiver")
+		return fmt.Errorf("`hostNetwork` cannot be true for gateway")
 	}
 
 	return nil
@@ -156,61 +177,23 @@ func (r *Agent) defaultInstrumentation() {
 }
 
 func (r *Agent) defaultAgent() {
+	d := getDefaultAgentDaemonSet(r)
+
 	spec := &r.Spec.Agent
 	spec.HostNetwork = true
 
-	// The agent is enabled by default
-	if spec.Enabled == nil {
-		spec.Enabled = &[]bool{true}[0]
-	}
-
 	if spec.Volumes == nil {
-		spec.Volumes = []v1.Volume{
-			{
-				Name: "hostfs",
-				VolumeSource: v1.VolumeSource{
-					HostPath: &v1.HostPathVolumeSource{Path: "/"},
-				},
-			},
-			{
-				Name: "etc-passwd",
-				VolumeSource: v1.VolumeSource{
-					HostPath: &v1.HostPathVolumeSource{Path: "/etc/passwd"},
-				},
-			},
-		}
+		spec.Volumes = d.Spec.Template.Spec.Volumes
 	}
 
 	if spec.VolumeMounts == nil {
-		hostToContainer := v1.MountPropagationHostToContainer
-		spec.VolumeMounts = []v1.VolumeMount{
-			{
-				Name:             "hostfs",
-				MountPath:        "/hostfs",
-				ReadOnly:         true,
-				MountPropagation: &hostToContainer,
-			},
-			{
-				Name:      "etc-passwd",
-				MountPath: "/etc/passwd",
-				ReadOnly:  true,
-			},
-		}
+		// We only have one container in collector pods at the moment.
+		spec.VolumeMounts = d.Spec.Template.Spec.Containers[0].VolumeMounts
+
 	}
 
 	if spec.Tolerations == nil {
-		spec.Tolerations = []v1.Toleration{
-			{
-				Key:      "node.alpha.kubernetes.io/role",
-				Effect:   v1.TaintEffectNoSchedule,
-				Operator: v1.TolerationOpExists,
-			},
-			{
-				Key:      "node-role.kubernetes.io/master",
-				Effect:   v1.TaintEffectNoSchedule,
-				Operator: v1.TolerationOpExists,
-			},
-		}
+		spec.Tolerations = d.Spec.Template.Spec.Tolerations
 	}
 
 	if spec.SecurityContext == nil {
@@ -225,18 +208,13 @@ func (r *Agent) defaultAgent() {
 	setDefaultEnvVars(spec, r.Spec.Realm, r.Spec.ClusterName)
 
 	if spec.Config == "" {
-		spec.Config = defaultAgentConfig
+		spec.Config = getDefaultAgentConfigMapAsString(r)
 	}
 }
 
 func (r *Agent) defaultClusterReceiver() {
 	spec := &r.Spec.ClusterReceiver
 	spec.HostNetwork = false
-
-	// The cluster receiver is enabled by default
-	if spec.Enabled == nil {
-		spec.Enabled = &[]bool{true}[0]
-	}
 
 	setDefaultResources(spec, defaultClusterReceiverCPU,
 		defaultClusterReceiverMemory)
@@ -252,123 +230,37 @@ func (r *Agent) defaultClusterReceiver() {
 }
 
 func (r *Agent) defaultGateway() {
+	d := getDefaultGatewayDeployment(r)
 	spec := &r.Spec.Gateway
 	spec.HostNetwork = false
 
-	// The gateway is not enabled by default
-	if spec.Enabled == nil {
-		s := false
-		spec.Enabled = &s
+	if spec.Volumes == nil {
+		spec.Volumes = d.Spec.Template.Spec.Volumes
+	}
+
+	if spec.VolumeMounts == nil {
+		// We only have one container in collector pods at the moment.
+		spec.VolumeMounts = d.Spec.Template.Spec.Containers[0].VolumeMounts
+
+	}
+
+	if spec.Tolerations == nil {
+		spec.Tolerations = d.Spec.Template.Spec.Tolerations
 	}
 
 	if spec.Replicas == nil {
-		s := int32(3)
-		spec.Replicas = &s
+		spec.Replicas = d.Spec.Replicas
 	}
 
 	if spec.Ports == nil {
-		spec.Ports = []v1.ServicePort{
-			{
-				Name:     "otlp",
-				Protocol: "TCP",
-				Port:     4317,
-			},
-			{
-				Name:     "otlp-http",
-				Protocol: "TCP",
-				Port:     4318,
-			},
-			{
-				Protocol: "TCP",
-				Port:     55681,
-			},
-			{
-				Name:     "jaeger-thrift",
-				Protocol: "TCP",
-				Port:     14268,
-			},
-			{
-				Name:     "jaeger-grpc",
-				Protocol: "TCP",
-				Port:     14250,
-			},
-			{
-				Name:     "zipkin",
-				Protocol: "TCP",
-				Port:     9411,
-			},
-			{
-				Name:     "signalfx",
-				Protocol: "TCP",
-				Port:     9943,
-			},
-			{
-				Name:     "http-forwarder",
-				Protocol: "TCP",
-				Port:     6060,
-			},
-		}
-	}
-
-	if spec.Enabled == nil {
-		s := false
-		spec.Enabled = &s
-	}
-
-	if spec.Replicas == nil {
-		s := int32(3)
-		spec.Replicas = &s
-	}
-
-	if spec.Ports == nil {
-		spec.Ports = []v1.ServicePort{
-			{
-				Name:     "otlp",
-				Protocol: "TCP",
-				Port:     4317,
-			},
-			{
-				Name:     "otlp-http",
-				Protocol: "TCP",
-				Port:     4318,
-			},
-			{
-				Protocol: "TCP",
-				Port:     55681,
-			},
-			{
-				Name:     "jaeger-thrift",
-				Protocol: "TCP",
-				Port:     14268,
-			},
-			{
-				Name:     "jaeger-grpc",
-				Protocol: "TCP",
-				Port:     14250,
-			},
-			{
-				Name:     "zipkin",
-				Protocol: "TCP",
-				Port:     9411,
-			},
-			{
-				Name:     "signalfx",
-				Protocol: "TCP",
-				Port:     9943,
-			},
-			{
-				Name:     "http-forwarder",
-				Protocol: "TCP",
-				Port:     6060,
-			},
-		}
+		spec.Ports = getDefaultService(r).Spec.Ports
 	}
 
 	setDefaultResources(spec, defaultGatewayCPU, defaultGatewayMemory)
 	setDefaultEnvVars(spec, r.Spec.Realm, r.Spec.ClusterName)
 
 	if spec.Config == "" {
-		spec.Config = defaultGatewayConfig
+		spec.Config = getDefaultGatewayConfigMapAsString(r)
 	}
 }
 
@@ -392,12 +284,13 @@ func setDefaultResources(spec *CollectorSpec, defaultCPU string,
 func setDefaultEnvVars(spec *CollectorSpec, realm string, clusterName string) {
 	if spec.Env == nil {
 		spec.Env = []v1.EnvVar{
+			// TODO: Add another access token reference here for Splunk Cloud Platform support.
 			{
-				Name: "SPLUNK_ACCESS_TOKEN",
+				Name: "SPLUNK_OBSERVABILITY_ACCESS_TOKEN",
 				ValueFrom: &v1.EnvVarSource{
 					SecretKeyRef: &v1.SecretKeySelector{
 						LocalObjectReference: v1.LocalObjectReference{Name: "splunk-access-token"},
-						Key:                  "access-token",
+						Key:                  "splunk-observability-access-token",
 					},
 				},
 			},

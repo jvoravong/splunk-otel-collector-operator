@@ -38,7 +38,7 @@ func Agents(ctx context.Context, params Params) error {
 		// TODO(splunk): pass params.Instance.Spec.Agent instead of params.Instance
 		desired = append(desired, collector.Agent(params.Log, params.Instance))
 	}
-
+	print(desired)
 	// first, handle the create/update parts
 	if err := expectedAgents(ctx, params, desired); err != nil {
 		return fmt.Errorf("failed to reconcile the expected daemon sets: %w", err)

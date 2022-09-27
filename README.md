@@ -37,7 +37,7 @@ kubectl apply -f https://github.com/signalfx/splunk-otel-collector-operator/rele
 ### 3. Add your Splunk token  
   
 ```  
-kubectl create secret generic splunk-access-token --namespace splunk-otel-operator-system --from-literal=access-token=SPLUNK_ACCESS_TOKEN  
+kubectl create secret generic splunk-access-token --namespace splunk-otel-operator-system --from-literal=splunk_observability_access_token=SPLUNK_OBSERVABILITY_ACCESS_TOKEN
 ```  
 A new users could obtain a token by starting a [Splunk Observability trial](https://www.splunk.com/en_us/download/o11y-cloud-free-trial.html) and following these steps for [creating a token](https://docs.splunk.com/Observability/admin/authentication-tokens/tokens.html).
 
@@ -61,7 +61,7 @@ EOF
   
 Replace `MY_CLUSTER_NAME` and `SPLUNK_REALM` with your values.
 
-### 4. Verify the cert-manager, operator, and collector are up and running properly.
+### 5. Verify the cert-manager, operator, and collector are up and running properly.
 ```
 kubectl get pods -n cert-manager
 NAME                                       READY   STATUS    RESTARTS   AGE

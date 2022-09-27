@@ -223,7 +223,7 @@ func (h *handler) injectConfig(ctx context.Context, cfg config, pod corev1.Pod, 
 		{Name: envOTELServiceName, Value: serviceName(pod, resourceAttrs)},
 		{Name: envOTELExporterOTLPEndpoint, Value: cfg.endpoint},
 		{Name: envOTELTracesExporter, Value: cfg.exporter},
-		// TODO: add SPLUNK_ACCESS_TOKEN using env from
+		// TODO: add SPLUNK_OBSERVABILITY_ACCESS_TOKEN using env from
 		// 1. check if "splunk-access-token" secret key is present in
 		// the same namespace as the pod and use ValueFrom to inject it.
 		// 2. if it is not present, read it from the operator namespace

@@ -49,6 +49,7 @@ func TestNewObjectsOnReconciliation(t *testing.T) {
 		},
 		Spec: v1alpha1.AgentSpec{
 			Gateway: v1alpha1.CollectorSpec{
+				// The gateway is enabled to maximize test coverage.
 				Enabled: &[]bool{true}[0],
 			},
 		},

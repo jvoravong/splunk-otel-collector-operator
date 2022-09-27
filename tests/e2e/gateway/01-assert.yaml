@@ -18,10 +18,10 @@ data:
 
         exporters:
           sapm:
-            access_token: ${SPLUNK_ACCESS_TOKEN}
+            access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
             endpoint: https://ingest.${SPLUNK_REALM}.signalfx.com/v2/trace
           signalfx:
-            access_token: ${SPLUNK_ACCESS_TOKEN}
+            access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
             api_url: https://api.${SPLUNK_REALM}.signalfx.com
             ingest_url: https://ingest.${SPLUNK_REALM}.signalfx.com
         extensions:
@@ -230,7 +230,7 @@ spec:
         - args:
             - --config=/conf/collector.yaml
           env:
-            - name: SPLUNK_ACCESS_TOKEN
+            - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:
                   key: access-token

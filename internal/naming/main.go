@@ -64,7 +64,10 @@ func MonitoringService(otelcol v1alpha1.Agent) string {
 
 // Service builds the service name based on the instance.
 func Service(otelcol v1alpha1.Agent) string {
-	return fmt.Sprintf("%s-collector", otelcol.Name)
+	// We use this specific name value here for the service so the operator and chart agents talk to the proper gateway endpoint.
+	//  https://github.com/signalfx/splunk-otel-collector-operator/blob/4bb7baf363a536dc124a6790495e952d4f3fad00/internal/collector/reconcile/service.go#L113
+	//  https://github.com/signalfx/splunk-otel-collector-chart/blob/24a71781579dd80f4682189c25146d6ba0337c0e/helm-charts/splunk-otel-collector/templates/service.yaml#L6
+	return fmt.Sprintf("%s", otelcol.Name)
 }
 
 // ServiceAccount builds the service account name based on the instance.
