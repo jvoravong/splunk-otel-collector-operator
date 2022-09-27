@@ -42,12 +42,17 @@ func TestNewObjectsOnReconciliation(t *testing.T) {
 	// prepare
 	nsn := types.NamespacedName{Name: "my-instance", Namespace: "default"}
 	reconciler := NewReconciler(logger, k8sClient, testScheme, nil)
+
 	created := &v1alpha1.Agent{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      nsn.Name,
 			Namespace: nsn.Namespace,
 		},
-		Spec: v1alpha1.AgentSpec{},
+		Spec: v1alpha1.AgentSpec{
+			Gateway: v1alpha1.CollectorSpec{
+				Enabled: &[]bool{true}[0],
+			},
+		},
 	}
 	err := k8sClient.Create(context.Background(), created)
 	require.NoError(t, err)
@@ -84,13 +89,12 @@ func TestNewObjectsOnReconciliation(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, list.Items)
 	}
-	// TODO(splunk): forcibly disable this test until we add gateway support
-	//{
-	//	list := &corev1.ServiceList{}
-	//	err = k8sClient.List(context.Background(), list, opts...)
-	//	assert.NoError(t, err)
-	//	assert.NotEmpty(t, list.Items)
-	//}
+	{
+		list := &corev1.ServiceList{}
+		err = k8sClient.List(context.Background(), list, opts...)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, list.Items)
+	}
 	{
 		list := &appsv1.DeploymentList{}
 		err = k8sClient.List(context.Background(), list, opts...)
