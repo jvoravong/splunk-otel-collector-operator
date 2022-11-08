@@ -73,7 +73,7 @@ func desiredConfigMap(_ context.Context, params Params, config, kind string) cor
 			Annotations: params.Instance.Annotations,
 		},
 		Data: map[string]string{
-			"collector.yaml": config,
+			"relay.yaml": config,
 		},
 	}
 }

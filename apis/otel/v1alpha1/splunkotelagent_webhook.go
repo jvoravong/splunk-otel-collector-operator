@@ -70,19 +70,21 @@ func (r *Agent) Default() {
 	}
 	// The gateway is not enabled by default
 	if r.Spec.Gateway.Enabled == nil {
-		s := false
-		r.Spec.Gateway.Enabled = &s
+		r.Spec.Gateway.Enabled = &[]bool{false}[0]
 	}
 
-	r.defaultAgent()
-	r.defaultClusterReceiver()
-	r.defaultGateway()
-	// if r.Spec.Agent.Enabled {
-	// }
-	// if .Spec.ClusterReceiver.Enabled {
-	// }
-	// if .Spec.Gateway.Enabled {
-	// }
+	// The agent is enabled by default
+	if *r.Spec.Agent.Enabled {
+		r.defaultAgent()
+	}
+	// The cluster receiver is enabled by default
+	if *r.Spec.ClusterReceiver.Enabled {
+		r.defaultClusterReceiver()
+	}
+	// The gateway is not enabled by default
+	if *r.Spec.Gateway.Enabled {
+		r.defaultGateway()
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
@@ -204,8 +206,13 @@ func (r *Agent) defaultAgent() {
 		}
 	}
 
-	setDefaultResources(spec, defaultAgentCPU, defaultAgentMemory)
-	setDefaultEnvVars(spec, r.Spec.Realm, r.Spec.ClusterName)
+	if spec.Resources.Limits == nil {
+		spec.Resources.Limits = d.Spec.Template.Spec.Containers[0].Resources.Limits
+	}
+
+	if spec.Env == nil {
+		spec.Env = d.Spec.Template.Spec.Containers[0].Env
+	}
 
 	if spec.Config == "" {
 		spec.Config = getDefaultAgentConfigMapAsString(r)
@@ -213,18 +220,22 @@ func (r *Agent) defaultAgent() {
 }
 
 func (r *Agent) defaultClusterReceiver() {
+	d := getDefaultClusterReceiverDeployment(r)
 	spec := &r.Spec.ClusterReceiver
 	spec.HostNetwork = false
+	if spec.Resources.Limits == nil {
+		spec.Resources.Limits = d.Spec.Template.Spec.Containers[0].Resources.Limits
+	}
 
-	setDefaultResources(spec, defaultClusterReceiverCPU,
-		defaultClusterReceiverMemory)
-	setDefaultEnvVars(spec, r.Spec.Realm, r.Spec.ClusterName)
+	if spec.Env == nil {
+		spec.Env = d.Spec.Template.Spec.Containers[0].Env
+	}
 
 	if spec.Config == "" {
 		if detectedDistro == autodetect.OpenShiftDistro {
 			spec.Config = defaultClusterReceiverConfigOpenshift
 		} else {
-			spec.Config = defaultClusterReceiverConfig
+			spec.Config = getDefaultClusterReceiverConfigMapAsString(r)
 		}
 	}
 }
@@ -256,8 +267,13 @@ func (r *Agent) defaultGateway() {
 		spec.Ports = getDefaultService(r).Spec.Ports
 	}
 
-	setDefaultResources(spec, defaultGatewayCPU, defaultGatewayMemory)
-	setDefaultEnvVars(spec, r.Spec.Realm, r.Spec.ClusterName)
+	if spec.Resources.Limits == nil {
+		spec.Resources.Limits = d.Spec.Template.Spec.Containers[0].Resources.Limits
+	}
+
+	if spec.Env == nil {
+		spec.Env = d.Spec.Template.Spec.Containers[0].Env
+	}
 
 	if spec.Config == "" {
 		spec.Config = getDefaultGatewayConfigMapAsString(r)

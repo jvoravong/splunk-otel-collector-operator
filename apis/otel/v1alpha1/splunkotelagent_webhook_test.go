@@ -24,8 +24,7 @@ import (
 )
 
 func TestDefaultSpecNoNils(t *testing.T) {
-	var a = Agent{}
-	a.Default()
+	var a = getAgent()
 	assert.NotNil(t, a.Spec.Realm)
 	assert.NotNil(t, a.Spec.ClusterName)
 	assert.NotNil(t, a.Spec.Agent)
@@ -35,18 +34,22 @@ func TestDefaultSpecNoNils(t *testing.T) {
 }
 
 func TestDefaultAgentValues(t *testing.T) {
-	var a = Agent{
-		Spec: AgentSpec{
-			Realm:       "test",
-			ClusterName: "test",
-		},
-	}
-
+	var a = getAgent()
 	a.Default()
 	assert.True(t, *a.Spec.Agent.Enabled, "The agent should be enabled by default")
 	assert.True(t, *a.Spec.ClusterReceiver.Enabled, "The cluster receiver should be enabled by default")
 	assert.False(t, *a.Spec.Gateway.Enabled, "The gateway should not be enabled by default")
 	assert.Equal(t, a.Spec.Instrumentation.Java.Image, defaultJavaAgentImage, "The java image should have a default value")
+}
+
+func TestShouldValidateSpecWithChartSchema(t *testing.T) {
+	var a = Agent{
+		Spec: AgentSpec{
+			// Realm:       "test",
+			// ClusterName: "test",
+		},
+	}
+	assert.Panics(t, a.Default, "The schema validation should have failed")
 }
 
 func TestDefaultResourceLimits(t *testing.T) {
@@ -55,22 +58,23 @@ func TestDefaultResourceLimits(t *testing.T) {
 		outSpec resource.Quantity
 		outEnv  []v1.EnvVar
 	}
-	var a = Agent{}
+	var a = getAgent()
+	a.Spec.Gateway.Enabled = &[]bool{true}[0]
 	a.Default()
 	testCases := []testCase{
-		{in: defaultAgentCPU,
+		{in: "200m",
 			outSpec: a.Spec.Agent.Resources.Limits[v1.ResourceCPU]},
-		{in: defaultAgentMemory,
+		{in: "500Mi",
 			outSpec: a.Spec.Agent.Resources.Limits[v1.ResourceMemory],
 			outEnv:  a.Spec.Agent.Env},
-		{in: defaultClusterReceiverCPU,
+		{in: "200m",
 			outSpec: a.Spec.ClusterReceiver.Resources.Limits[v1.ResourceCPU]},
-		{in: defaultClusterReceiverMemory,
+		{in: "500Mi",
 			outSpec: a.Spec.ClusterReceiver.Resources.Limits[v1.ResourceMemory],
 			outEnv:  a.Spec.ClusterReceiver.Env},
-		{in: defaultGatewayCPU,
+		{in: "4",
 			outSpec: a.Spec.Gateway.Resources.Limits[v1.ResourceCPU]},
-		{in: defaultGatewayMemory,
+		{in: "8Gi",
 			outSpec: a.Spec.Gateway.Resources.Limits[v1.ResourceMemory],
 			outEnv:  a.Spec.Gateway.Env},
 	}
@@ -117,5 +121,14 @@ func TestGetMemSizeInMiB(t *testing.T) {
 	}
 	for _, c := range testCases {
 		assert.Equal(t, getMemSizeInMiB(resource.MustParse(c.in)), c.out)
+	}
+}
+
+func getAgent() Agent {
+	return Agent{
+		Spec: AgentSpec{
+			Realm:       "test",
+			ClusterName: "test",
+		},
 	}
 }

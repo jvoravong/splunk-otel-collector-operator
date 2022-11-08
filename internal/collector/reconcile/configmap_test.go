@@ -40,7 +40,7 @@ func TestDesiredConfigMap(t *testing.T) {
 		expectedLables["app.kubernetes.io/name"] = "test-agent"
 
 		expectedData := map[string]string{
-			"collector.yaml": `processors:
+			"relay.yaml": `processors:
 receivers:
   jaeger:
     protocols:
@@ -126,7 +126,7 @@ func TestExpectedConfigMap(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, exists)
 		assert.Equal(t, instanceUID, actual.OwnerReferences[0].UID)
-		assert.Equal(t, params().Instance.Spec.Agent.Config, actual.Data["collector.yaml"])
+		assert.Equal(t, params().Instance.Spec.Agent.Config, actual.Data["relay.yaml"])
 	})
 
 	t.Run("should delete config map", func(t *testing.T) {

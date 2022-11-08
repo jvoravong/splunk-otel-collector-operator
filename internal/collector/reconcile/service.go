@@ -24,7 +24,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -267,9 +266,8 @@ func filterPort(logger logr.Logger, candidate corev1.ServicePort, portNumbers ma
 	}
 
 	// The Splunk Otel Collector and Chart use the port name for the TargetPort value.
-	candidate.TargetPort = intstr.IntOrString{
-		StrVal: candidate.Name,
-	}
+	// candidate.TargetPort = intstr.IntOrString{
+	// 	StrVal: candidate.Name,
 
 	// this port is unique, return as is
 	return &candidate

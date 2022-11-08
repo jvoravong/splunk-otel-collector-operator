@@ -35,8 +35,8 @@ func Volumes(spec v1alpha1.CollectorSpec, configmap string) []corev1.Volume {
 				// LocalObjectReference: corev1.LocalObjectReference{Name: naming.ConfigMap(spec)},
 				LocalObjectReference: corev1.LocalObjectReference{Name: configmap},
 				Items: []corev1.KeyToPath{{
-					Key:  "collector.yaml",
-					Path: "collector.yaml",
+					Key:  "relay.yaml",
+					Path: "relay.yaml",
 				}},
 			},
 		},

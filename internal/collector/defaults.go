@@ -21,6 +21,6 @@ import (
 	"github.com/signalfx/splunk-otel-collector-operator/internal/version"
 )
 
-const configmapEntry = "collector.yaml"
+const configmapEntry = "relay.yaml"
 
 var defaultCollectorImage = fmt.Sprintf("quay.io/signalfx/splunk-otel-collector:%s", version.Collector())
