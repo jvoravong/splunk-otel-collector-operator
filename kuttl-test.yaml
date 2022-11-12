@@ -12,4 +12,6 @@ commands:
   - command: sleep 5
 testDirs:
   - ./tests/e2e/
-timeout: 150
+# Useful for debugging e2e tests
+timeout: 45
+#timeout: 150

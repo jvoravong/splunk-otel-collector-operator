@@ -51,7 +51,7 @@ func Agent(logger logr.Logger, otelcol v1alpha1.Agent) appsv1.DaemonSet {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: ServiceAccountName(otelcol),
 					Containers:         []corev1.Container{Container(logger, otelcol.Spec.Agent)},
-					Volumes:            Volumes(otelcol.Spec.Agent, naming.ConfigMap(otelcol, "agent")),
+					Volumes:            Volumes(otelcol.Spec.Agent, naming.ConfigMapVolume()),
 					Tolerations:        otelcol.Spec.Agent.Tolerations,
 					HostNetwork:        otelcol.Spec.Agent.HostNetwork,
 				},

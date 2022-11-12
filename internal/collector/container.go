@@ -49,13 +49,23 @@ func Container(logger logr.Logger, spec v1alpha1.CollectorSpec) corev1.Container
 		args = append(args, fmt.Sprintf("--%s=%s", k, v))
 	}
 
-	// We could filter out /conf volumeMounts if they were defined
-	volumeMounts := []corev1.VolumeMount{{
-		Name:      naming.ConfigMapVolume(),
-		MountPath: "/conf",
-	}}
+	configMapVolumeMountDefined := false
+	for i := 0; i < len(spec.VolumeMounts); i++ {
+		if spec.VolumeMounts[i].MountPath == "/conf" {
+			configMapVolumeMountDefined = true
+			break
+		}
+	}
 
-	volumeMounts = append(volumeMounts, spec.VolumeMounts...)
+	volumeMounts := spec.VolumeMounts
+	if !configMapVolumeMountDefined {
+		// We could filter out /conf volumeMounts if they were defined
+		volumeMount := corev1.VolumeMount{
+			Name:      naming.ConfigMapVolume(),
+			MountPath: "/conf",
+		}
+		volumeMounts = append(volumeMounts, volumeMount)
+	}
 
 	var envVars = spec.Env
 	if spec.Env == nil {

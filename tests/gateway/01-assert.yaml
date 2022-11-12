@@ -14,7 +14,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: splunk-otel-collector-operator
 data:
-  collector.yaml: |2
+  relay.yaml: |2
 
         exporters:
           sapm:
@@ -228,7 +228,7 @@ spec:
     spec:
       containers:
         - args:
-            - --config=/conf/collector.yaml
+            - --config=/conf/relay.yaml
           env:
             - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
               valueFrom:
@@ -239,7 +239,7 @@ spec:
               value: my-splunk-realm
             - name: MY_CLUSTER_NAME
               value: test-cluster-gateway-only
-            - name: HOST_PROC
+            - name: HOST_PROCx
               value: /hostfs/proc
             - name: HOST_SYS
               value: /hostfs/sys
@@ -309,8 +309,8 @@ spec:
         - configMap:
             defaultMode: 420
             items:
-              - key: collector.yaml
-                path: collector.yaml
+              - key: relay.yaml
+                path: relay.yaml
             name: test-gateway-only-gateway
           name: otc-internal
 status:

@@ -52,7 +52,7 @@ func ClusterReceiver(logger logr.Logger, otelcol v1alpha1.Agent) appsv1.Deployme
 				Spec: corev1.PodSpec{
 					ServiceAccountName: ServiceAccountName(otelcol),
 					Containers:         []corev1.Container{Container(logger, otelcol.Spec.ClusterReceiver)},
-					Volumes:            Volumes(otelcol.Spec.ClusterReceiver, naming.ConfigMap(otelcol, "cluster-receiver")),
+					Volumes:            Volumes(otelcol.Spec.ClusterReceiver, naming.ConfigMapVolume()),
 					Tolerations:        otelcol.Spec.ClusterReceiver.Tolerations,
 				},
 			},

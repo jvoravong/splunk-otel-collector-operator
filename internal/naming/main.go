@@ -29,7 +29,7 @@ func ConfigMap(spec v1alpha1.Agent, kind string) string {
 
 // ConfigMapVolume returns the name to use for the config map's volume in the pod.
 func ConfigMapVolume() string {
-	return "otel-configmap"
+	return "collector-configmap"
 }
 
 // Container returns the name to use for the container in the pod.

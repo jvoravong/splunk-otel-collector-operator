@@ -149,18 +149,18 @@ const (
 func getDefaultAgentDaemonSet(r *Agent) *appsv1.DaemonSet {
 	d := getChartManifestString(r, "(daemonset.yaml)").(*appsv1.DaemonSet)
 
-	original := d.Spec.Template.Spec.Containers[0].VolumeMounts
-	var filtered []v1.VolumeMount
-	// We remove the otel-configmap volume mount because the operator will set it later.
-	// See:
-	//  https://github.com/signalfx/splunk-otel-collector-chart/blob/24a71781579dd80f4682189c25146d6ba0337c0e/rendered/manifests/agent-only/daemonset.yaml#L149
-	//  https://github.com/signalfx/splunk-otel-collector-operator/blob/4bb7baf363a536dc124a6790495e952d4f3fad00/internal/collector/container.go#L54
-	for i := 0; i < len(original); i++ {
-		if original[i].Name != "otel-configmap" {
-			filtered = append(filtered, original[i])
-		}
-	}
-	d.Spec.Template.Spec.Containers[0].VolumeMounts = filtered
+	// original := d.Spec.Template.Spec.Containers[0].VolumeMounts
+	// var filtered []v1.VolumeMount
+	// // We remove the otel-configmap volume mount because the operator will set it later.
+	// // See:
+	// //  https://github.com/signalfx/splunk-otel-collector-chart/blob/24a71781579dd80f4682189c25146d6ba0337c0e/rendered/manifests/agent-only/daemonset.yaml#L149
+	// //  https://github.com/signalfx/splunk-otel-collector-operator/blob/4bb7baf363a536dc124a6790495e952d4f3fad00/internal/collector/container.go#L54
+	// for i := 0; i < len(original); i++ {
+	// 	if original[i].Name != "otel-configmap" {
+	// 		filtered = append(filtered, original[i])
+	// 	}
+	// }
+	// d.Spec.Template.Spec.Containers[0].VolumeMounts = filtered
 
 	return d
 }
@@ -172,18 +172,18 @@ func getDefaultAgentConfigMapAsString(r *Agent) string {
 func getDefaultClusterReceiverDeployment(r *Agent) *appsv1.Deployment {
 	d := getChartManifestString(r, "(deployment-cluster-receiver.yaml)").(*appsv1.Deployment)
 
-	original := d.Spec.Template.Spec.Containers[0].VolumeMounts
-	var filtered []v1.VolumeMount
-	// We remove the otel-configmap volume mount because the operator will set it later.
-	// See:
-	//  https://github.com/signalfx/splunk-otel-collector-chart/blob/24a71781579dd80f4682189c25146d6ba0337c0e/rendered/manifests/gateway-only/deployment-gateway.yaml#L113
-	//  https://github.com/signalfx/splunk-otel-collector-operator/blob/4bb7baf363a536dc124a6790495e952d4f3fad00/internal/collector/container.go#L54
-	for i := 0; i < len(original); i++ {
-		if original[i].Name != "collector-configmap" {
-			filtered = append(filtered, original[i])
-		}
-	}
-	d.Spec.Template.Spec.Containers[0].VolumeMounts = filtered
+	// original := d.Spec.Template.Spec.Containers[0].VolumeMounts
+	// var filtered []v1.VolumeMount
+	// // We remove the otel-configmap volume mount because the operator will set it later.
+	// // See:
+	// //  https://github.com/signalfx/splunk-otel-collector-chart/blob/24a71781579dd80f4682189c25146d6ba0337c0e/rendered/manifests/gateway-only/deployment-gateway.yaml#L113
+	// //  https://github.com/signalfx/splunk-otel-collector-operator/blob/4bb7baf363a536dc124a6790495e952d4f3fad00/internal/collector/container.go#L54
+	// for i := 0; i < len(original); i++ {
+	// 	if original[i].Name != "otel-configmap" {
+	// 		filtered = append(filtered, original[i])
+	// 	}
+	// }
+	// d.Spec.Template.Spec.Containers[0].VolumeMounts = filtered
 
 	return d
 }
@@ -195,18 +195,18 @@ func getDefaultClusterReceiverConfigMapAsString(r *Agent) string {
 func getDefaultGatewayDeployment(r *Agent) *appsv1.Deployment {
 	d := getChartManifestString(r, "(deployment-gateway.yaml)").(*appsv1.Deployment)
 
-	original := d.Spec.Template.Spec.Containers[0].VolumeMounts
-	var filtered []v1.VolumeMount
-	// We remove the otel-configmap volume mount because the operator will set it later.
-	// See:
-	//  https://github.com/signalfx/splunk-otel-collector-chart/blob/24a71781579dd80f4682189c25146d6ba0337c0e/rendered/manifests/gateway-only/deployment-gateway.yaml#L113
-	//  https://github.com/signalfx/splunk-otel-collector-operator/blob/4bb7baf363a536dc124a6790495e952d4f3fad00/internal/collector/container.go#L54
-	for i := 0; i < len(original); i++ {
-		if original[i].Name != "collector-configmap" {
-			filtered = append(filtered, original[i])
-		}
-	}
-	d.Spec.Template.Spec.Containers[0].VolumeMounts = filtered
+	// original := d.Spec.Template.Spec.Containers[0].VolumeMounts
+	// var filtered []v1.VolumeMount
+	// // We remove the otel-configmap volume mount because the operator will set it later.
+	// // See:
+	// //  https://github.com/signalfx/splunk-otel-collector-chart/blob/24a71781579dd80f4682189c25146d6ba0337c0e/rendered/manifests/gateway-only/deployment-gateway.yaml#L113
+	// //  https://github.com/signalfx/splunk-otel-collector-operator/blob/4bb7baf363a536dc124a6790495e952d4f3fad00/internal/collector/container.go#L54
+	// for i := 0; i < len(original); i++ {
+	// 	if original[i].Name != "otel-configmap" {
+	// 		filtered = append(filtered, original[i])
+	// 	}
+	// }
+	// d.Spec.Template.Spec.Containers[0].VolumeMounts = filtered
 
 	return d
 }

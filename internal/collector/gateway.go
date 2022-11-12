@@ -53,7 +53,7 @@ func Gateway(logger logr.Logger, otelcol v1alpha1.Agent) appsv1.Deployment {
 					ServiceAccountName: ServiceAccountName(otelcol),
 					Containers: []corev1.Container{
 						Container(logger, otelcol.Spec.Gateway)},
-					Volumes:     Volumes(otelcol.Spec.Gateway, naming.ConfigMap(otelcol, "gateway")),
+					Volumes:     Volumes(otelcol.Spec.Gateway, naming.ConfigMapVolume()),
 					Tolerations: otelcol.Spec.Gateway.Tolerations,
 				},
 			},

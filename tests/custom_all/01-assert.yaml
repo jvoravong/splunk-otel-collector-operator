@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: splunk-otel-collector-operator
 data:
-  collector.yaml: |2
+  relay.yaml: |2
     extensions:
       http_forwarder:
         ingress:
@@ -199,7 +199,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: splunk-otel-collector-operator
 data:
-  collector.yaml: |2+
+  relay.yaml: |2+
     extensions:
       http_forwarder:
         ingress:
@@ -319,7 +319,7 @@ spec:
     spec:
       containers:
       - args:
-        - --config=/conf/collector.yaml
+        - --config=/conf/relay.yaml
         env:
         - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
           valueFrom:
@@ -370,8 +370,8 @@ spec:
       - configMap:
           defaultMode: 420
           items:
-          - key: collector.yaml
-            path: collector.yaml
+          - key: relay.yaml
+            path: relay.yaml
           name: test-custom-agent
         name: otc-internal
       - hostPath:
